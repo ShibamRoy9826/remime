@@ -1,0 +1,25 @@
+[general]
+ringtone_path="/home/shibam/remime/digital_clock.mp3"
+color="#cdd6f4"
+border_enabled=true
+border_type="round"
+border_color="#cdd6f4"
+custom_message="Keep studying!"
+time_format="%I:%M:%S"
+time_format_24="%H:%M:%S"
+target_time_label=true
+backup_interval=5
+
+[pomodoro]
+pomodoro=25
+short_break=5
+long_break=15
+alarm_ring_interval=1
+take_backups=true
+
+[timer]
+default_hour=0
+default_min=5
+default_sec=0
+take_backups=true
+

@@ -1,0 +1,26 @@
+Vertical{
+  height: auto;
+  width: 100%;
+  padding: 1;
+  margin: 3;
+  color: $foreground;
+  align:center middle;
+}
+
+Time{
+  text-align: center;
+  padding: 2;
+  border-title-align: left;
+}
+
+#info_text{
+  color: $foreground-muted;
+  text-align: center;
+  margin: 2;
+  align: center middle;
+  width: 100%;
+}
+
+Screen{
+  align:center middle;
+}
