@@ -1,4 +1,5 @@
-from typing import Set
+from textual.binding import Binding
+from textual.widgets import Footer, Header
 
 from widgets import *
 
@@ -25,9 +26,9 @@ catppuccin = Theme(
 
 class Remime(App):
     BINDINGS = [
-        ("q", "quit_app", "Quits the application"),
-        ("d", "toggle_dark", "Toggles dark mode"),
-        ("m", "stop_ring", "Stops alarm sound"),
+        Binding("q", "quit_app", "Quits the application"),
+        Binding("d", "toggle_dark", "Toggles dark mode"),
+        Binding("m", "stop_ring", "To Stop alarm"),
     ]
     CSS_PATH = "remime.tcss"
 
@@ -39,6 +40,7 @@ class Remime(App):
         self.bg = bg
         self.completed = begin[0] * 3600 + begin[1] * 60 + begin[2]
         self.target_label = ""
+        self.header_icon="󰍜"
         if mode == "clock":
 
             self.wdg = Time(
@@ -49,14 +51,14 @@ class Remime(App):
                 mode, time_list, begin, ringtone, default_time=strftime(time_format_24)
             )
         elif mode == "pomodoro":
-
-            self.target_label = f"Target -> {time_list[0]:02,.0f}:{time_list[1]:02,.0f}:{time_list[2]:02,.0f}.00"
+            self.target_label = f"Target -> {time_list[0]:02,.0f}:{time_list[1]:02,.0f}:{time_list[2]:02,.0f}"
             self.wdg = Pomodoro(time_list, begin, ringtone, default_time="00:00:00.00")
             self.time_list = "Next"
+
         elif mode == "stopwatch":
             self.wdg = Time(mode, [float("inf"), 0, 0], begin, ringtone)
         else:
-            self.target_label = f"Target -> {time_list[0]:02,.0f}:{time_list[1]:02,.0f}:{time_list[2]:02,.0f}.00"
+            self.target_label = f"Target -> {time_list[0]:02,.0f}:{time_list[1]:02,.0f}:{time_list[2]:02,.0f}"
             self.wdg = Time(mode, time_list, begin, ringtone)
 
         if config["general"]["target_time_label"]:
@@ -64,9 +66,18 @@ class Remime(App):
         else:
             self.info = Label("", id="info_text")
 
+        self.stopRingingBtn=Button("Stop Ringing!",id="stop_ring_btn",disabled=True)
+        self.stopRingingBtn.styles.display="none"
+
         super().__init__()
 
     def compose(self) -> ComposeResult:
+        if config["general"]["header"]:
+            yield Header(icon=self.header_icon)
+
+        if config["general"]["footer"]:
+            yield Footer(show_command_palette=False)
+
         if mode == "pomodoro":
             if self.completed != 0:
                 self.inputBox = Input(value=begin[4], type="text", id="task_input")
@@ -79,17 +90,26 @@ class Remime(App):
             yield Vertical(
                 self.inputBox,
                 self.wdg,
+                self.info,
                 Horizontal(
                     Button("Pause", id="pause_button"),
-                    self.info,
                     Button("Reset", id="reset_button"),
                 ),
+                Horizontal(
+                    Button("Pomodoro", id="pomodoro_btn"),
+                    Button("Short Break", id="short_break_btn"),
+                    Button("Long Break", id="long_break_btn"),
+                    self.stopRingingBtn,
+                ),
             )
+
+
 
         if mode == "stopwatch":
             self.info.update("Stopwatch Started!")
             yield Vertical(
                 self.wdg,
+                self.stopRingingBtn,
                 Horizontal(
                     Button("Pause", id="pause_button"),
                     self.info,
@@ -97,7 +117,9 @@ class Remime(App):
                 ),
             )
         else:
+            yield self.stopRingingBtn
             yield Vertical(self.wdg, self.info)
+
 
     def on_mount(self) -> None:
         self.register_theme(catppuccin)
@@ -110,6 +132,80 @@ class Remime(App):
                 config["general"]["border_color"],
             )
             self.wdg.border_title = config["general"]["custom_message"]
+        if self.mode=="pomodoro":
+            self.start_pomodoro()
+
+    def start_pomodoro(self):
+        if self.wdg.started:
+            self.wdg.pause()
+            self.wdg.reset()
+
+        self.inputBox.value=""
+        self.inputBox.disabled=False
+        pomodoro_minutes=config["pomodoro"]["pomodoro"]
+        self.wdg.target_seconds=pomodoro_minutes*60
+        self.target_label=f"Target -> {pomodoro_minutes//60:02,.0f}:{pomodoro_minutes%60:02,.0f}:00"
+        self.info.update(self.target_label)
+
+    def start_short_break(self):
+        if self.wdg.started:
+            self.wdg.pause()
+            self.wdg.reset()
+        self.inputBox.value="Short break"
+        self.inputBox.disabled=True
+        short_min=config["pomodoro"]["short_break"]
+        self.wdg.target_seconds=short_min*60
+        self.target_label=f"Target -> {short_min//60:02,.0f}:{short_min%60:02,.0f}:00"
+        self.info.update(self.target_label)
+        self.wdg.start()
+
+    def start_long_break(self):
+        if self.wdg.started:
+            self.wdg.pause()
+            self.wdg.reset()
+        self.inputBox.value="Long break"
+        self.inputBox.disabled=True
+        long_min=config["pomodoro"]["long_break"]
+        self.wdg.target_seconds=long_min*60
+        self.target_label=f"Target -> {long_min//60:02,.0f}:{long_min%60:02,.0f}:00"
+        self.info.update(self.target_label)
+        self.wdg.start()
+
+    def pause_time(self,btn):
+        if self.mode=="pomodoro":
+            if self.wdg.started and self.inputBox.disabled:
+                if str(btn.label) == "Pause":
+                    btn.label = "Start"
+                    btn.styles.background = self.theme_variables.get("secondary")
+                    self.wdg.pause()
+                    self.info.update(f"{self.target_label} (paused)")
+                else:
+                    btn.label = "Pause"
+                    btn.styles.background = self.theme_variables.get("error")
+                    self.wdg.resume()
+                    self.info.update(self.target_label)
+        elif self.mode=="stopwatch":
+            if str(btn.label) == "Pause":
+                btn.label = "Start"
+                btn.styles.background = self.theme_variables.get("secondary")
+                self.info.update("Paused stopwatch...")
+                self.wdg.pause()
+            else:
+                btn.label = "Pause"
+                btn.styles.background = self.theme_variables.get("error")
+                self.info.update("Stopwatch Started!")
+                self.wdg.resume()
+    def reset_time(self,btn):
+        if self.mode=="pomodoro":
+            if self.wdg.started:
+                self.wdg.pause()
+                self.wdg.reset()
+            self.inputBox.disabled=False
+            self.inputBox.value = ""
+        elif self.mode=="stopwatch":
+            self.wdg.pause()
+            self.wdg.reset()
+            self.info.update("Stopwatch has been reset")
 
     def action_toggle_dark(self) -> None:
         """An action to toggle dark mode."""
@@ -122,7 +218,43 @@ class Remime(App):
         exit()
 
     def action_stop_ring(self) -> None:
-        mixer.music.stop()
+        if mixer.music.get_busy:
+            mixer.music.stop()
+            self.stopRingingBtn.styles.display="none"
+            self.stopRingingBtn.disabled=True
+            try:
+                if self.mode=="pomodoro":
+                    if config["pomodoro"]["automatic_mode_change"]:
+                        m=self.wdg.pomodoro_mode
+                        btn2=self.app.query_one("#pause_button",Button)
+                        btn2.disabled=False
+                        btn3=self.app.query_one("#reset_button",Button)
+                        btn3.disabled=False
+                        if self.wdg.pomodoro_count==config["pomodoro"]["total_pomodoros"]:
+                            self.start_long_break()
+                        elif m=="long_break":
+                            self.wdg.pomodoro_count=0
+                            self.wdg.pomodoro_mode="pomodoro"
+                            self.start_pomodoro()
+                        else:
+                            if m=="pomodoro":
+                                self.wdg.pomodoro_mode="short_break"
+                                self.start_short_break()
+                            elif m=="short_break":
+                                self.wdg.pomodoro_mode="pomodoro"
+                                self.wdg.pomodoro_count+=1
+                                self.start_pomodoro()
+                    else:
+                        self.wdg.pomodoro_mode="pomodoro"
+                        self.start_pomodoro()
+                else:
+                    self.wdg.pomodoro_mode="pomodoro"
+                    self.start_pomodoro()
+
+                        
+
+            except:
+                pass
 
     def on_input_submitted(self, event: Input.Submitted) -> None:
         if event.input.id == "task_input":
@@ -134,24 +266,24 @@ class Remime(App):
         btn = event.button
         btn_id = event.button.id
         if btn_id == "pause_button":
-            if str(btn.label) == "Pause":
-                btn.label = "Start"
-                btn.styles.background = self.theme_variables.get("secondary")
-                self.info.update("Paused stopwatch...")
-                self.wdg.pause()
-            else:
-                btn.label = "Pause"
-                btn.styles.background = self.theme_variables.get("error")
-                self.info.update("Stopwatch Started!")
-                self.wdg.resume()
+            self.pause_time(btn)
+
         if btn_id == "reset_button":
-            self.wdg.pause()
-            self.wdg.reset()
-            if self.mode=="pomodoro":
-                self.inputBox.disabled=False
-                self.inputBox.value = ""
-            else:
-                self.info.update("Stopwatch has been reset")
+            self.reset_time(btn)
+
+        if btn_id == "pomodoro_btn":
+            self.start_pomodoro()
+
+        if btn_id == "short_break_btn":
+            self.start_short_break()
+
+        if btn_id == "long_break_btn":
+            self.start_long_break()
+        if btn_id == "stop_ring_btn":
+            self.action_stop_ring()
+            btn.styles.display="none"
+
+
 
 
 if __name__ == "__main__":
@@ -187,6 +319,12 @@ if __name__ == "__main__":
         "-rb",
         "--remove-backup",
         help="Removes backup timing if present",
+        action="store_true",
+    )
+    a.add_argument(
+        "-rc",
+        "--reset-config",
+        help="Resets configuration file",
         action="store_true",
     )
     a.add_argument(
@@ -263,7 +401,7 @@ if __name__ == "__main__":
     for ind, i in enumerate(timeList):
         timeList[ind] = int(i)
 
-    notui = ["-h", "--help", "-rb", "--remove-backup"]
+    notui = ["-h", "--help", "-rb", "--remove-backup","-rc","--reset-config"]
     is_notui = False
     for i in notui:
         if i in argv:
@@ -275,7 +413,19 @@ if __name__ == "__main__":
             mode, args.foreground, args.background, timeList, begin, args.ringtone
         )
         app.run()
-    if args.remove_backup:
-        write_default_backup()
-    else:
+    elif args.remove_backup:
+        a=ask("Are you sure you want to remove your backup timing?")
+        if a:
+            write_default_backup()
+        else:
+            print("Aborted...")
+
+    elif args.reset_config:
+        a=ask("Are you sure you want to reset your config?")
+        if a:
+            write_default_conf()
+        else:
+            print("Aborted...")
+
+    elif args.help:
         a.print_help()

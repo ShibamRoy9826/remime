@@ -82,6 +82,7 @@ class Time(Digits):
         self.start_time+=pause_duration
         
         self.update_timer.resume()
+
     def reset(self)-> None:
         self.is_reset=True
         self.update(self.default_time)
@@ -89,7 +90,17 @@ class Time(Digits):
     def ring(self) -> None:
         mixer.music.load(self.ringtone)
         mixer.music.play()
-
+        write_default_backup()
+        try:
+            btn=self.app.query_one("#stop_ring_btn",Button)
+            btn.styles.display="block"
+            btn.disabled=False
+            btn2=self.app.query_one("#pause_button",Button)
+            btn2.disabled=True
+            btn3=self.app.query_one("#reset_button",Button)
+            btn3.disabled=True
+        except:
+            pass
 
 
 class Pomodoro(Digits):
@@ -98,14 +109,15 @@ class Pomodoro(Digits):
     ):
         self.time_list = time_list
         self.ringtone = ringtone
-        self.target_seconds = time_list[0] * 3600 + time_list[1] * 60 + time_list[2]
+
+        self.pomodoro_mode=begin[-2]
+        self.target_seconds = config["pomodoro"][self.pomodoro_mode] * 60 
         self.completed = begin[0] * 3600 + begin[1] * 60 + begin[2]
         self.task_statement = begin[-1]
-        self.rounds = 0
-        self.under_break = False
-        self.under_long_break = False
-        self.default_time=default_time
+        self.pomodoro_count=0
 
+        self.default_time=default_time
+        self.started=False
         mixer.init()
         super().__init__(default_time)
 
@@ -119,6 +131,7 @@ class Pomodoro(Digits):
         self.time = float(self.completed)
         self.start_time = monotonic()
         self.update_timer = self.set_interval(1 / 60, self.update_time)
+        self.started=True
 
     def update_time(self) -> None:
         self.time = (monotonic() - self.start_time) + float(self.completed)
@@ -130,9 +143,12 @@ class Pomodoro(Digits):
             config["pomodoro"]["take_backups"]
         ):
             backupTime(
-                f"{int(hours)},{int(minutes)},{int(seconds)},rest", self.task_statement
+                f"{int(hours)},{int(minutes)},{int(seconds)},{self.pomodoro_mode}", self.task_statement
             )
-
+        if (int(self.time)>=self.target_seconds):
+            self.update_timer.pause()
+            write_default_backup()
+            self.ring()
 
     def pause(self) -> None:
         self.update_timer.pause()
@@ -142,8 +158,8 @@ class Pomodoro(Digits):
         temp2=monotonic()
         pause_duration=temp2-self.temp
         self.start_time+=pause_duration
-        
         self.update_timer.resume()
+
     def reset(self)-> None:
         self.is_reset=True
         self.update(self.default_time)
@@ -153,3 +169,15 @@ class Pomodoro(Digits):
     def ring(self):
         mixer.music.load(self.ringtone)
         mixer.music.play()
+        write_default_backup()
+        try:
+            btn=self.app.query_one("#stop_ring_btn",Button)
+            btn.styles.display="block"
+            btn.disabled=False
+            btn2=self.app.query_one("#pause_button",Button)
+            btn2.disabled=True
+            btn3=self.app.query_one("#reset_button",Button)
+            btn3.disabled=True
+        except:
+            pass
+

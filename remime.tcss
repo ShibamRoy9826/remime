@@ -10,6 +10,7 @@ Vertical{
 Horizontal{
   width:100%;
   min-height:6;
+
 }
 
 Time{
@@ -21,7 +22,8 @@ Time{
 #info_text{
   color: $foreground-muted;
   text-align: center;
-  margin: 2;
+  margin: 1;
+  min-height: 1;
   align: center middle;
   width: 100%;
 }
@@ -30,7 +32,6 @@ Button{
   display:block;
   background: $primary;
   color: $foreground;
-  margin-top: 2;
   margin-right: 2;
 }
 
@@ -49,6 +50,21 @@ Button:hover{
 
 #reset_button{
   dock:right;
+  background: $secondary;
+}
+
+#stop_ring_btn{
+  display: none;
+  background: $error;
+  color: $background;
+  min-width: 3;
+  min-height: 2;
+  margin:0;
+  
+}
+#stop_ring_btn:hover{
+  color: $foreground;
+  background: $secondary;
 }
 
 Screen{
