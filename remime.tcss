@@ -7,6 +7,11 @@ Vertical{
   align:center middle;
 }
 
+Horizontal{
+  width:100%;
+  min-height:6;
+}
+
 Time{
   text-align: center;
   padding: 2;
@@ -19,6 +24,31 @@ Time{
   margin: 2;
   align: center middle;
   width: 100%;
+}
+
+Button{
+  display:block;
+  background: $primary;
+  color: $foreground;
+  margin-top: 2;
+  margin-right: 2;
+}
+
+Button:hover{
+  background: $primary-muted;
+  color: $background;
+}
+
+#pause_button {
+  background: $error;
+  dock:left;
+}
+#pause_button:focus{
+  background: $success;
+}
+
+#reset_button{
+  dock:right;
 }
 
 Screen{

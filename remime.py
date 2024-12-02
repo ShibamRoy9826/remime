@@ -1,27 +1,6 @@
-from argparse import ArgumentParser
-from os import environ, makedirs, path
-from sys import argv
-from time import monotonic, strftime
+from typing import Set
 
-from textual.app import App, ComposeResult
-from textual.containers import Vertical
-from textual.reactive import reactive
-from textual.theme import Theme
-from textual.widgets import Digits, Input, Label
-from toml import load
-
-from var_funcs import *
-
-environ["PYGAME_HIDE_SUPPORT_PROMPT"] = "1"
-
-from pygame import mixer
-
-mixer.init()
-if not path.exists(backup_directory):
-    makedirs(backup_directory)
-
-if not path.isfile(backup_file):
-    write_default_backup()
+from widgets import *
 
 catppuccin = Theme(
     name="catppuccin",
@@ -44,112 +23,6 @@ catppuccin = Theme(
 )
 
 
-class Time(Digits):
-    start_time = reactive(monotonic)
-    time = reactive(0.0)
-
-    def __init__(
-        self,
-        mode: str,
-        time_list: list,
-        begin: list,
-        ringtone: str,
-        default_time="00:00:00.00",
-    ):
-        self.mode = mode
-        self.time_list = time_list
-        self.ringtone = ringtone
-        self.target_seconds = time_list[0] * 3600 + time_list[1] * 60 + time_list[2]
-
-        if self.mode == "in":
-            self.message = "Time Up!"
-        else:
-            self.message = "Target time hit!"
-
-        super().__init__(default_time)
-
-    def compose(self) -> ComposeResult:
-        return super().compose()
-
-    def on_mount(self) -> None:
-        if mode == "clock" or mode == "clock_24":
-            self.update_timer = self.set_interval(1, self.update_clock)
-        else:
-            self.update_timer = self.set_interval(1 / 60, self.update_time)
-
-    def update_time(self) -> None:
-        self.time = monotonic() - self.start_time
-        minutes, seconds = divmod(self.time, 60)
-        hours, minutes = divmod(minutes, 60)
-        self.update(f"{hours:02,.0f}:{minutes:02.0f}:{seconds:05.2f}")
-
-        if int(self.time) >= self.target_seconds:
-            self.update(self.message)
-            self.update_timer.pause()
-            self.app.query_one("#info_text", Label).update("Press q to quit")
-            self.ring()
-
-    def update_clock(self) -> None:
-        if self.mode == "clock":
-            self.time = strftime(time_format)
-            self.update(self.time)
-            self.app.query_one("#info_text", Label).update(strftime("%p"))
-        else:
-            self.time = strftime(time_format_24)
-            self.update(self.time)
-
-    def ring(self):
-        mixer.music.load(self.ringtone)
-        mixer.music.play()
-
-    def stopRinging(self):
-        mixer.music.stop()
-
-
-class Pomodoro(Digits):
-    def __init__(
-        self, time_list: list, begin: list, ringtone: str, default_time="00:00:00.00"
-    ):
-        self.time_list = time_list
-        self.ringtone = ringtone
-        self.target_seconds = time_list[0] * 3600 + time_list[1] * 60 + time_list[2]
-        self.completed = begin[0] * 3600 + begin[1] * 60 + begin[2]
-        self.task_statement = begin[-1]
-        self.rounds = 0
-        self.under_break = False
-        self.under_long_break = False
-        super().__init__(default_time)
-
-    def reset_time(self):
-        self.time = 0.0
-
-    def set_task(self, task):
-        self.task_statement = task
-
-    def compose(self) -> ComposeResult:
-        return super().compose()
-
-    def start(self) -> None:
-        self.time = float(self.completed)
-        self.start_time = monotonic()
-        self.update_timer = self.set_interval(1 / 60, self.update_time)
-
-    def update_time(self) -> None:
-        self.time = (monotonic() - self.start_time) + float(self.completed)
-        minutes, seconds = divmod(self.time, 60)
-        hours, minutes = divmod(minutes, 60)
-        self.update(f"{hours:02,.0f}:{minutes:02.0f}:{seconds:05.2f}")
-
-        if (int(self.time) % config["general"]["backup_interval"] == 0) and (config["pomodoro"]["take_backups"]):
-            backupTime(
-                f"{int(hours)},{int(minutes)},{int(seconds)},rest", self.task_statement
-            )
-
-    def ring(self):
-        mixer.music.load(self.ringtone)
-        mixer.music.play()
-
-
 class Remime(App):
     BINDINGS = [
         ("q", "quit_app", "Quits the application"),
@@ -165,8 +38,9 @@ class Remime(App):
         self.fg = fg
         self.bg = bg
         self.completed = begin[0] * 3600 + begin[1] * 60 + begin[2]
-        self.target_label = f"Target -> {time_list[0]:02,.0f}:{time_list[1]:02,.0f}:{time_list[2]:02,.0f}.00"
+        self.target_label = ""
         if mode == "clock":
+
             self.wdg = Time(
                 mode, time_list, begin, ringtone, default_time=strftime(time_format)
             )
@@ -175,9 +49,14 @@ class Remime(App):
                 mode, time_list, begin, ringtone, default_time=strftime(time_format_24)
             )
         elif mode == "pomodoro":
+
+            self.target_label = f"Target -> {time_list[0]:02,.0f}:{time_list[1]:02,.0f}:{time_list[2]:02,.0f}.00"
             self.wdg = Pomodoro(time_list, begin, ringtone, default_time="00:00:00.00")
             self.time_list = "Next"
+        elif mode == "stopwatch":
+            self.wdg = Time(mode, [float("inf"), 0, 0], begin, ringtone)
         else:
+            self.target_label = f"Target -> {time_list[0]:02,.0f}:{time_list[1]:02,.0f}:{time_list[2]:02,.0f}.00"
             self.wdg = Time(mode, time_list, begin, ringtone)
 
         if config["general"]["target_time_label"]:
@@ -197,7 +76,26 @@ class Remime(App):
                 self.inputBox = Input(
                     placeholder="What did you plan to do?", type="text", id="task_input"
                 )
-            yield Vertical(self.inputBox, self.wdg, self.info)
+            yield Vertical(
+                self.inputBox,
+                self.wdg,
+                Horizontal(
+                    Button("Pause", id="pause_button"),
+                    self.info,
+                    Button("Reset", id="reset_button"),
+                ),
+            )
+
+        if mode == "stopwatch":
+            self.info.update("Stopwatch Started!")
+            yield Vertical(
+                self.wdg,
+                Horizontal(
+                    Button("Pause", id="pause_button"),
+                    self.info,
+                    Button("Reset", id="reset_button"),
+                ),
+            )
         else:
             yield Vertical(self.wdg, self.info)
 
@@ -226,16 +124,37 @@ class Remime(App):
     def action_stop_ring(self) -> None:
         mixer.music.stop()
 
-    async def on_input_submitted(self, event: Input.Submitted) -> None:
+    def on_input_submitted(self, event: Input.Submitted) -> None:
         if event.input.id == "task_input":
             self.inputBox.disabled = True
             self.wdg.set_task(self.inputBox.value)
             self.wdg.start()
 
+    def on_button_pressed(self, event: Button.Pressed) -> None:
+        btn = event.button
+        btn_id = event.button.id
+        if btn_id == "pause_button":
+            if str(btn.label) == "Pause":
+                btn.label = "Start"
+                btn.styles.background = self.theme_variables.get("secondary")
+                self.info.update("Paused stopwatch...")
+                self.wdg.pause()
+            else:
+                btn.label = "Pause"
+                btn.styles.background = self.theme_variables.get("error")
+                self.info.update("Stopwatch Started!")
+                self.wdg.resume()
+        if btn_id == "reset_button":
+            self.wdg.pause()
+            self.wdg.reset()
+            if self.mode=="pomodoro":
+                self.inputBox.disabled=False
+                self.inputBox.value = ""
+            else:
+                self.info.update("Stopwatch has been reset")
+
 
 if __name__ == "__main__":
-    with open(conf_path, "r") as f:
-        config = load(f)
     a = ArgumentParser(
         prog="Remime",
         description="An easy to use TUI application to manage time efficiently",
@@ -250,13 +169,13 @@ if __name__ == "__main__":
     a.add_argument(
         "-in",
         "--intime",
-        help="Set a timer, takes input in hour, min, second ( Without commas)",
+        help="Set a timer, requires -hr,-m, and -s parameters",
         action="store_true",
     )
     a.add_argument(
         "-p",
         "--pomodoro",
-        help="Starts a pomodoro timer, takes inputs in minutes, and rest time, uses 25min & 5min if not specified",
+        help="Starts a pomodoro timer for extra work efficiency",
         action="store_true",
     )
     a.add_argument("-stop", "--stopwatch", help="Starts stopwatch", action="store_true")

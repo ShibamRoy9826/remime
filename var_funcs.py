@@ -1,4 +1,13 @@
-from os import getlogin
+from argparse import ArgumentParser
+from os import getlogin, makedirs, path
+from sys import argv
+from time import strftime
+
+from textual.app import App, ComposeResult
+from textual.containers import Horizontal, Vertical
+from textual.theme import Theme
+from textual.widgets import Button, Digits, Input, Label
+from toml import load
 
 username = getlogin()
 time_format = "%I:%M:%S"
@@ -72,3 +81,13 @@ def backupTime(string, task="", pomodoro=True):
             s += i
     with open(backup_file, "w") as fl:
         fl.write(s)
+
+
+if not path.exists(backup_directory):
+    makedirs(backup_directory)
+
+if not path.isfile(backup_file):
+    write_default_backup()
+
+with open(conf_path, "r") as f:
+    config = load(f)
