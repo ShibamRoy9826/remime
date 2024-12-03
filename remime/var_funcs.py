@@ -15,38 +15,59 @@ time_format_24 = "%H:%M:%S"
 conf_directory=f"/home/{username}/.config/remime"
 conf_path = f"{conf_directory}/config.toml"
 backup_directory = f"/home/{username}/.local/share/remime"
+css_path = f"{conf_directory}/remime.tcss"
 backup_file = f"{backup_directory}/remime.timebackup"
 default_backup = """
 0,0,0,pomodoro
 0,0,0
 """
 default_config = f"""[general]
-ringtone_path="/home/{username}/.config/remime/digital_clock.mp3" # Edit to some other ringtone if you want a different alarm sound 
-border_enabled=true # Whether to display a border aroud the clock
-border_type="round"  # Border type, read at: https://textual.textualize.io/styles/border/#all-border-types
-border_color="#cdd6f4" # Border color
+# Edit to some other ringtone if you want a different alarm sound 
+ringtone_path="/home/{username}/.config/remime/digital_clock.mp3" 
+# Whether to display a border around the clock
+border_enabled=true 
+
+# Border type, read at: https://textual.textualize.io/styles/border/#all-border-types
+border_type="round"  
+
+# Border color
+border_color="#cdd6f4" 
 custom_message="Either you run the day, or the day runs you!" # Custom message that you may want to have around the clock border
                                                               # Keep "" if you don't want this
-time_format="%I:%M:%S" # Format of clock when called --clock (12 hour clock)
-time_format_24="%H:%M:%S" # Format of clock when called --clock-24 (24 hour clock)
-target_time_label=true ## Still under work, will not work properly
-backup_interval=5 # Number of seconds after which it will save the time, requires take_backups=true
+# Format of clock when called --clock (12 hour clock)
+time_format="%I:%M:%S" 
+# Format of clock when called --clock-24 (24 hour clock)
+time_format_24="%H:%M:%S" 
+## Still under work, will not work properly
+target_time_label=true 
+# Number of seconds after which it will save the time, requires take_backups=true
+backup_interval=5 
 header=false # To toggle the header widget
 footer=false # To toggle the footer widget
 
 [pomodoro]
-pomodoro=25  # Pomodoro time (in minutes)
-short_break=5  # Short break time (in minutes)
-long_break=20  # Long break time (in minutes)
-automatic_mode_change=true # Automatically change modes from pomodoro to short_break, and occasionally long_breaks
-take_backups=true # Take time backups, if you quit the application by mistake, and reopen it, you will be almost on the same place! (depends on backup_interval)
-total_pomodoros=4 # Total number of pomodoros, each pomodoro consits of 1 working session, and a short_break. After total_pomodoros, a long break timer starts
+# Pomodoro time (in minutes)
+pomodoro=25  
+# Short break time (in minutes)
+short_break=5  
+# Long break time (in minutes)
+long_break=20  
+# Automatically change modes from pomodoro to short_break, and occasionally long_breaks
+automatic_mode_change=true 
+# Take time backups, if you quit the application by mistake, and reopen it, you will be almost on the same place! (depends on backup_interval)
+take_backups=true 
+# Total number of pomodoros, each pomodoro consits of 1 working session, and a short_break. After total_pomodoros, a long break timer starts
+total_pomodoros=4 
 
 [timer]
-default_hour=0 # Default hours when no time is specified while calling --in
-default_min=0 # Default minutes when no time is specified while calling --in
-default_sec=0 # Default seconds when no time is specified while calling --in
-take_backups=true ## Working on it, doesn't work for now..
+# Default hours when no time is specified while calling --in
+default_hour=0 
+# Default minutes when no time is specified while calling --in
+default_min=0 
+# Default seconds when no time is specified while calling --in
+default_sec=0 
+## Working on it, doesn't work for now..
+take_backups=true 
 """
 
 

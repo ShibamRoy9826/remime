@@ -4,7 +4,7 @@ from time import monotonic
 from textual.reactive import reactive
 from textual.widgets import Digits
 
-from var_funcs import *
+from .var_funcs import *
 
 environ["PYGAME_HIDE_SUPPORT_PROMPT"] = "1"
 from pygame import mixer

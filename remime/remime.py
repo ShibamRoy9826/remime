@@ -1,7 +1,7 @@
 from textual.binding import Binding
 from textual.widgets import Footer, Header
 
-from widgets import *
+from .widgets import *
 
 catppuccin = Theme(
     name="catppuccin",
@@ -26,11 +26,14 @@ catppuccin = Theme(
 
 class Remime(App):
     BINDINGS = [
-        Binding("q", "quit_app", "Quits the application"),
-        Binding("d", "toggle_dark", "Toggles dark mode"),
-        Binding("m", "stop_ring", "To Stop alarm"),
+        Binding("q", "quit_app", "Quits The Application"),
+        Binding("d", "toggle_dark", "Toggles Dark Mode"),
+        Binding("m", "stop_ring", "To Mute The Alarm"),
+        Binding("p", "pause_time","To Pause Alarm Time"),
+        Binding("r", "reset_time","To Reset Alarm Time")
     ]
-    CSS_PATH = "remime.tcss"
+
+    CSS_PATH = css_path
 
     def __init__(
         self, mode: str, fg: str, bg: str, time_list: list, begin: list, ringtone: str
@@ -195,7 +198,7 @@ class Remime(App):
                 btn.styles.background = self.theme_variables.get("error")
                 self.info.update("Stopwatch Started!")
                 self.wdg.resume()
-    def reset_time(self,btn):
+    def reset_time(self):
         if self.mode=="pomodoro":
             if self.wdg.started:
                 self.wdg.pause()
@@ -206,6 +209,18 @@ class Remime(App):
             self.wdg.pause()
             self.wdg.reset()
             self.info.update("Stopwatch has been reset")
+    def action_pause_time(self) -> None:
+        try:
+            b=self.query_one("#pause_button",Button)
+            self.pause_time(b)
+        except:
+            pass
+
+    def action_reset_time(self) -> None:
+        try:
+            self.reset_time()
+        except:
+            pass
 
     def action_toggle_dark(self) -> None:
         """An action to toggle dark mode."""
@@ -269,7 +284,7 @@ class Remime(App):
             self.pause_time(btn)
 
         if btn_id == "reset_button":
-            self.reset_time(btn)
+            self.reset_time()
 
         if btn_id == "pomodoro_btn":
             self.start_pomodoro()
@@ -291,13 +306,14 @@ if __name__ == "__main__":
         prog="Remime",
         description="An easy to use TUI application to manage time efficiently",
         usage="remime [mode] [options] [values]",
+        epilog="The configuration file for remime can be found at $HOME/.config/remime/config.toml"
     )
-    a.add_argument(
-        "-at",
-        "--at",
-        help="Set an alarm at a particular time, takes 24hr clock input",
-        action="store_true",
-    )
+    # a.add_argument(
+    #     "-at",
+    #     "--at",
+    #     help="Set an alarm at a particular time, takes 24hr clock input",
+    #     action="store_true",
+    # )
     a.add_argument(
         "-in",
         "--intime",
@@ -373,8 +389,8 @@ if __name__ == "__main__":
         mode = "pomodoro"
     elif args.intime:
         mode = "in"
-    elif args.at:
-        mode = "at"
+    # elif args.at:
+    #     mode = "at"
     elif args.clock_24:
         mode = "clock_24"
     elif args.stopwatch:
