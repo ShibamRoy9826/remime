@@ -3,6 +3,7 @@ from os import getlogin, makedirs, path
 from sys import argv
 from time import strftime
 
+from rich.console import Console
 from textual.app import App, ComposeResult
 from textual.containers import Horizontal, Vertical
 from textual.theme import Theme
@@ -10,6 +11,7 @@ from textual.widgets import Button, Digits, Input, Label
 from toml import load
 
 username = getlogin()
+version = "0.1.1"
 time_format = "%I:%M:%S"
 time_format_24 = "%H:%M:%S"
 conf_directory=f"/home/{username}/.config/remime"
@@ -70,18 +72,20 @@ default_sec=0
 take_backups=true 
 """
 
+c=Console()
+
 
 def write_default_backup():
     with open(backup_file, "w") as f:
         f.write(default_backup)
-        print("Wrote default backup")
+        c.print("[green]Wrote default backup[/green]")
 
 def write_default_conf():
     with open(conf_path, "w") as f:
         f.write(default_config)
-        print(f"Wrote default configuration to {conf_path}")
+        c.print(f"[green]Wrote default configuration to {conf_path}[/green]")
 
-def readBackup(pomodoro=True):
+def readBackup():
     ret = []
     with open(backup_file, "r") as f:
         content = f.readlines()
@@ -110,7 +114,7 @@ def backupTime(string, task="", pomodoro=True):
         fl.write(s)
 
 def ask(msg):
-    confirm=input(f"{msg} (y/n)")
+    confirm=c.input(f"[yellow]{msg} (y/n)[/yellow]")
     if confirm.lower()=="y":
         return True
     elif confirm.lower()=="n":

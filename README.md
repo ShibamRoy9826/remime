@@ -1,6 +1,7 @@
 # Remime
 
 An easy and efficient way to manage your time using the terminal! 
+
 written with ❤️  in Python and [textual](https://github.com/textualize/textual/) :)
 
 > [!NOTE]
@@ -126,32 +127,53 @@ take_backups=true
 
 Here's a list of all the commands 
 ```text
-usage: remime [mode] [options] [values]
+Remime
+__________
 
-An easy to use TUI application to manage time efficiently
-
-options:
-  -h, --help            show this help message and exit
-                        input
-  -in, --intime         Set a timer, requires -hr,-m, and -s parameters
-  -p, --pomodoro        Starts a pomodoro timer for extra work efficiency
-  -stop, --stopwatch    Starts stopwatch
-  -c, --clock           Starts a 12 hour clock
-  -c24, --clock-24      Starts a 24 hour clock
-  -rb, --remove-backup  Removes backup timing if present
-  -rc, --reset-config   Resets configuration file
-  -fg FOREGROUND, --foreground FOREGROUND
-                        Sets clock foreground color, takes input in hex code
-  -bg BACKGROUND, --background BACKGROUND
-                        Sets clock background color, takes input in hex code
-  -m MINUTES, --minutes MINUTES
-                        Sets minutes if required by current mode
-  -hr HOURS, --hours HOURS
-                        Sets hours if required by current mode
-  -s SECONDS, --seconds SECONDS
-                        Sets minutes if required by current mode
-  -r RINGTONE, --ringtone RINGTONE
-                        Sets ringtone for the alarm
+Typical Usage: remime -[mode] -[options]
+╭─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╮
+│ remime -h     -> show this help message and exit                                                                                            │
+│ or remime --help                                                                                                                            │
+│                                                                                                                                             │
+│ remime -in     -> Set a timer, requires -hr,-m, and -s parameters                                                                           │
+│ or remime --intime                                                                                                                          │
+│                                                                                                                                             │
+│ remime -p     -> Starts a pomodoro timer for extra work efficiency                                                                          │
+│ or remime --pomodoro                                                                                                                        │
+│                                                                                                                                             │
+│ remime -stop     -> Starts stopwatch                                                                                                        │
+│ or remime --stopwatch                                                                                                                       │
+│                                                                                                                                             │
+│ remime -c     -> Starts a 12 hour clock                                                                                                     │
+│ or remime --clock                                                                                                                           │
+│                                                                                                                                             │
+│ remime -c24     -> Starts a 24 hour clock                                                                                                   │
+│ or remime --clock-24                                                                                                                        │
+│                                                                                                                                             │
+│ remime -rb     -> Removes backup timing if present                                                                                          │
+│ or remime --remove-backup                                                                                                                   │
+│                                                                                                                                             │
+│ remime -rc     -> Resets configuration file                                                                                                 │
+│ or remime --reset-config                                                                                                                    │
+│                                                                                                                                             │
+│ remime -fg     -> Sets clock foreground color, takes input in hex code                                                                      │
+│ or remime --foreground                                                                                                                      │
+│                                                                                                                                             │
+│ remime -bg     -> Sets clock background color, takes input in hex code                                                                      │
+│ or remime --background                                                                                                                      │
+│                                                                                                                                             │
+│ remime -m     -> Sets minutes if required by current mode                                                                                   │
+│ or remime --minutes                                                                                                                         │
+│                                                                                                                                             │
+│ remime -hr     -> Sets hours if required by current mode                                                                                    │
+│ or remime --hours                                                                                                                           │
+│                                                                                                                                             │
+│ remime -s     -> Sets minutes if required by current mode                                                                                   │
+│ or remime --seconds                                                                                                                         │
+│                                                                                                                                             │
+│ remime -r     -> Sets ringtone for the alarm                                                                                                │
+│ or remime --ringtone                                                                                                                        │
+╰─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
 
 The configuration file for remime can be found at $HOME/.config/remime/config.toml
 ```
@@ -177,13 +199,12 @@ r -> Reset the alarm
 - An "--at" mode to set an alarm which would ring at a specific time
 - Configurable buttons
 - Custom keybindings
-- Rich Markdown integration, so that command line output looks more highlighted and beautiful
 - Nice quotes on top of clock border
 - Work on a lightweight alternative for the audio
 
 ## Known bugs 🐞
 - Hovering on Pause/Start button occasionally causes weird colors to show up
-- Doesn't backup breaks
+- Doesn't backup break timing
 
 ## Contributing 🤝
 

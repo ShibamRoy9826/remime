@@ -3,7 +3,6 @@ from time import monotonic
 
 from textual.reactive import reactive
 from textual.widgets import Digits
-
 from .var_funcs import *
 
 environ["PYGAME_HIDE_SUPPORT_PROMPT"] = "1"
@@ -27,6 +26,7 @@ class Time(Digits):
         self.time_list = time_list
         self.ringtone = ringtone
         self.target_seconds = time_list[0] * 3600 + time_list[1] * 60 + time_list[2]
+        self.completed = begin[0] * 3600 + begin[1] * 60 + begin[2]
         self.is_reset= True
         self.default_time=default_time
 
@@ -114,6 +114,10 @@ class Pomodoro(Digits):
         self.target_seconds = config["pomodoro"][self.pomodoro_mode] * 60 
         self.completed = begin[0] * 3600 + begin[1] * 60 + begin[2]
         self.task_statement = begin[-1]
+        if self.pomodoro_mode=="short_break":
+            self.task_statement="Short Break"
+        elif self.pomodoro_mode=="long_break":
+            self.task_statement="Long Break"
         self.pomodoro_count=0
 
         self.default_time=default_time
@@ -147,7 +151,6 @@ class Pomodoro(Digits):
             )
         if (int(self.time)>=self.target_seconds):
             self.update_timer.pause()
-            write_default_backup()
             self.ring()
 
     def pause(self) -> None:

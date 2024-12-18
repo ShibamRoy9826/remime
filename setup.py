@@ -23,7 +23,6 @@ def readRequirements():
                 a.append(line.strip())
     return a
 
-
 setup(
     name="remime",
     version="0.1.0",

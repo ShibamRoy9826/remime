@@ -1,6 +1,7 @@
+from sys import stdout
 from textual.binding import Binding
 from textual.widgets import Footer, Header
-
+from rich.panel import Panel
 from .widgets import *
 
 catppuccin = Theme(
@@ -23,6 +24,45 @@ catppuccin = Theme(
     },
 )
 
+
+class ArgP(ArgumentParser):
+    def _print_help(self,file=None):
+        c.print(r"""[bold blue]Remime[/bold blue]
+[bold]__________[/bold]
+
+[bold underline]Typical Usage:[/bold underline] [red]remime -\[mode] -\[options][/red]""")
+        lines=[]
+        for action in self._actions:
+            opts=action.option_strings
+            cmd_lines=[]
+            hlp=action.help
+            if hlp=="":
+                pass
+            else:
+                for i in opts:
+                    cmd_lines.append(f"remime {i}")
+                s=f"[bold]{cmd_lines[0]}[/bold]     -> [green]{hlp}[/green]"
+                for ind,cmd in enumerate(cmd_lines):
+                    if ind!=0:
+                        s+=f"\nor [bold]{cmd}[/bold]"
+                lines.append(s)
+        
+        options = "\n\n".join(lines)
+
+        c.print(Panel(options, border_style="blue"))
+        c.print("\n[red]The configuration file for remime can be found at $HOME/.config/remime/config.toml[/red]")
+
+    def print_help(self,file=None):
+        if file is None:
+            file=stdout
+        self._print_help(file)
+
+    def error(self,message):
+        if "unrecognized" in message:
+            c.print("[red]No such command found:( [/red] , try running [green]'remime -h'[/green]")
+        else:
+            c.print(f"[bold red]Error: {message}[/bold red]")
+        self.exit(2)
 
 class Remime(App):
     BINDINGS = [
@@ -71,6 +111,8 @@ class Remime(App):
 
         self.stopRingingBtn=Button("Stop Ringing!",id="stop_ring_btn",disabled=True)
         self.stopRingingBtn.styles.display="none"
+        self.begin=begin
+
 
         super().__init__()
 
@@ -81,11 +123,12 @@ class Remime(App):
         if config["general"]["footer"]:
             yield Footer(show_command_palette=False)
 
-        if mode == "pomodoro":
+        if self.mode == "pomodoro":
             if self.completed != 0:
-                self.inputBox = Input(value=begin[4], type="text", id="task_input")
+                self.inputBox = Input(value=self.begin[-1], type="text", id="task_input")
                 self.inputBox.disabled = True
                 self.wdg.start()
+
             else:
                 self.inputBox = Input(
                     placeholder="What did you plan to do?", type="text", id="task_input"
@@ -108,7 +151,7 @@ class Remime(App):
 
 
 
-        if mode == "stopwatch":
+        if self.mode == "stopwatch":
             self.info.update("Stopwatch Started!")
             yield Vertical(
                 self.wdg,
@@ -139,16 +182,25 @@ class Remime(App):
             self.start_pomodoro()
 
     def start_pomodoro(self):
-        if self.wdg.started:
-            self.wdg.pause()
-            self.wdg.reset()
+        if self.completed!=0:
+            self.inputBox.value=self.begin[-1]
+            self.inputBox.disabled=True
+            self.wdg.completed=self.completed
+            self.wdg.pomodoro_mode = self.begin[-2]
+            self.wdg.target_seconds= config["pomodoro"][self.wdg.pomodoro_mode] * 60 
+            print(self.wdg.target_seconds)
+            
+        else:
+            if self.wdg.started:
+                self.wdg.pause()
+                self.wdg.reset()
 
-        self.inputBox.value=""
-        self.inputBox.disabled=False
-        pomodoro_minutes=config["pomodoro"]["pomodoro"]
-        self.wdg.target_seconds=pomodoro_minutes*60
-        self.target_label=f"Target -> {pomodoro_minutes//60:02,.0f}:{pomodoro_minutes%60:02,.0f}:00"
-        self.info.update(self.target_label)
+            self.inputBox.value=""
+            self.inputBox.disabled=False
+            pomodoro_minutes=config["pomodoro"]["pomodoro"]
+            self.wdg.target_seconds=pomodoro_minutes*60
+            self.target_label=f"Target -> {pomodoro_minutes//60:02,.0f}:{pomodoro_minutes%60:02,.0f}:00"
+            self.info.update(self.target_label)
 
     def start_short_break(self):
         if self.wdg.started:
@@ -298,22 +350,27 @@ class Remime(App):
             self.action_stop_ring()
             btn.styles.display="none"
 
-
-
-
-if __name__ == "__main__":
-    a = ArgumentParser(
+def main():
+    a = ArgP(
         prog="Remime",
         description="An easy to use TUI application to manage time efficiently",
         usage="remime [mode] [options] [values]",
         epilog="The configuration file for remime can be found at $HOME/.config/remime/config.toml"
     )
+
     # a.add_argument(
     #     "-at",
     #     "--at",
     #     help="Set an alarm at a particular time, takes 24hr clock input",
     #     action="store_true",
     # )
+    
+    a.add_argument(
+        "-v",
+        "--version",
+        help="Print out application version number",
+        action="store_true",
+    )
     a.add_argument(
         "-in",
         "--intime",
@@ -397,14 +454,14 @@ if __name__ == "__main__":
         mode = "stopwatch"
     else:
         mode = "clock"
+    total_seconds=int(args.hours)*3600+int(args.minutes)*60+int(args.seconds)
+    hrs=total_seconds//3600
+    mins=total_seconds//60
+    timeList=[hrs,mins-(hrs*60),int(args.seconds)%60]
 
-    timeList = [args.hours, args.minutes, args.seconds]
     begin = []
 
-    if mode == "pomodoro":
-        bckp = readBackup()
-    else:
-        bckp = readBackup(False)
+    bckp = readBackup()
 
     for ind, j in enumerate(bckp[1]):
         if ind == 3:
@@ -417,7 +474,7 @@ if __name__ == "__main__":
     for ind, i in enumerate(timeList):
         timeList[ind] = int(i)
 
-    notui = ["-h", "--help", "-rb", "--remove-backup","-rc","--reset-config"]
+    notui = ["-h", "--help", "-rb", "--remove-backup","-rc","--reset-config", "-v","--version"]
     is_notui = False
     for i in notui:
         if i in argv:
@@ -435,6 +492,8 @@ if __name__ == "__main__":
             write_default_backup()
         else:
             print("Aborted...")
+    elif args.version:
+        print(f"Remime : v{version}")
 
     elif args.reset_config:
         a=ask("Are you sure you want to reset your config?")
@@ -445,3 +504,6 @@ if __name__ == "__main__":
 
     elif args.help:
         a.print_help()
+
+if __name__ == "__main__":
+    main()
