@@ -17,6 +17,8 @@ written with ❤️  in Python and [textual](https://github.com/textualize/textu
 - Modes include: Stopwatch, Clock, 24-hour Clock, Timer, Specific Timer(Ring in a certain hour,min,sec) and Pomodoro
 - Keybindings for almost everything! They are customizable too!
 
+The demo video is [here](https://github.com/ShibamRoy9826/remime)
+
 <img src="https://user-images.githubusercontent.com/73097560/115834477-dbab4500-a447-11eb-908a-139a6edaec5c.gif">
 
 ## Dependencies
