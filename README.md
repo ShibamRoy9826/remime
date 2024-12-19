@@ -14,8 +14,8 @@ written with ❤️  in Python and [textual](https://github.com/textualize/textu
 - It can take backups of your timer, so incase you exit by mistake, the next time you open it, you will almost be on the same place!
 - Highly customizable overall
 - Multiple themes that [textual](https://github.com/textualize/textual/) provides 
-- Modes include: Stopwatch, Clock, 24-hour Clock, Timer, and Pomodoro
-- Keybindings for almost everything! not customizable at the moment but planning to work on that on the next update!
+- Modes include: Stopwatch, Clock, 24-hour Clock, Timer, Specific Timer(Ring in a certain hour,min,sec) and Pomodoro
+- Keybindings for almost everything! They are customizable too!
 
 <img src="https://user-images.githubusercontent.com/73097560/115834477-dbab4500-a447-11eb-908a-139a6edaec5c.gif">
 
