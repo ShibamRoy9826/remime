@@ -1,4 +1,4 @@
-# Remime
+# Remime ⏰
 
 An easy and efficient way to manage your time using the terminal! 
 
@@ -119,6 +119,14 @@ default_min=0
 default_sec=0 
 ## Working on it, doesn't work for now..
 take_backups=true 
+
+[keybindings] 
+## You can learn about the syntax of the keybindings here: https://textual.textualize.io/guide/input/#bindings
+quit_app="q" ## To quit the application
+toggle_dark="d" ## To toggle dark mode
+stop_ring="m" ## To stop ringing(Mute)
+pause_time="p" ## To pause the alarm
+reset_time="r" ## To reset the clock tiem
 ```
 
 <h2>
@@ -135,8 +143,14 @@ Typical Usage: remime -[mode] -[options]
 │ remime -h     -> show this help message and exit                                                                                            │
 │ or remime --help                                                                                                                            │
 │                                                                                                                                             │
+│ remime -v     -> Print out application version number                                                                                       │
+│ or remime --version                                                                                                                         │
+│                                                                                                                                             │
 │ remime -in     -> Set a timer, requires -hr,-m, and -s parameters                                                                           │
 │ or remime --intime                                                                                                                          │
+│                                                                                                                                             │
+│ remime -at     -> Sets an alarm to ring in a specific time, requires -hr,-m, and -s parameters(Input in 24-hr clock)                        │
+│ or remime --at                                                                                                                              │
 │                                                                                                                                             │
 │ remime -p     -> Starts a pomodoro timer for extra work efficiency                                                                          │
 │ or remime --pomodoro                                                                                                                        │
@@ -202,10 +216,12 @@ But you can also change this bindings from your configuration file!
 - Nice quotes on top of clock border
 - Work on a lightweight alternative for the audio
 - Configurable alarm messages and target labels
+- Work on a daemon, so that alarms can be run in the background, without having to run it in the terminal
 
 ## Known bugs 🐞
 - Doesn't backup break timing properly
 - occasionally shows wrong target labels, even when the original target time is correct.(In automatic pomodoro mode)
+- Resetting and setting back again and again in pomodoro mode causes weird time labels
 
 ## Contributing 🤝
 

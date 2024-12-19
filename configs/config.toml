@@ -1,6 +1,6 @@
 [general]
 # Edit to some other ringtone if you want a different alarm sound 
-ringtone_path="/home/shibam/.config/remime/digital_clock.mp3" 
+ringtone_path="/home/{username}/.config/remime/digital_clock.mp3" 
 # Whether to display a border around the clock
 border_enabled=true 
 
