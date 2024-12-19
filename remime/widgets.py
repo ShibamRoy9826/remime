@@ -3,6 +3,7 @@ from time import monotonic
 
 from textual.reactive import reactive
 from textual.widgets import Digits
+
 from .var_funcs import *
 
 environ["PYGAME_HIDE_SUPPORT_PROMPT"] = "1"
@@ -25,6 +26,7 @@ class Time(Digits):
         self.mode = mode
         self.time_list = time_list
         self.ringtone = ringtone
+        self.ringing=False
         self.target_seconds = time_list[0] * 3600 + time_list[1] * 60 + time_list[2]
         self.completed = begin[0] * 3600 + begin[1] * 60 + begin[2]
         self.is_reset= True
@@ -32,8 +34,10 @@ class Time(Digits):
 
         if self.mode == "in":
             self.message = "Time Up!"
+        elif self.mode =="at":
+            self.message = "Its the Time!"
         else:
-            self.message = "Target time hit!"
+            self.message = "Target time completed!"
 
         mixer.init()
 
@@ -45,6 +49,8 @@ class Time(Digits):
     def on_mount(self) -> None:
         if self.mode == "clock" or self.mode == "clock_24":
             self.update_timer = self.set_interval(1, self.update_clock)
+        elif self.mode == "at":
+            self.update_timer = self.set_interval(1,self.update_atclock)
         else:
             self.update_timer = self.set_interval(1 / 60, self.update_time)
 
@@ -72,6 +78,20 @@ class Time(Digits):
             self.time = strftime(time_format_24)
             self.update(self.time)
 
+    def update_atclock(self) -> None:
+        self.time = strftime(time_format)
+        self.update(self.time)
+        self.hours=self.time_list[0]
+        self.minutes=self.time_list[1]
+        self.seconds=self.time_list[2]
+        print("Working...")
+        if int(strftime("%H"))==self.hours and int(strftime("%M"))==self.minutes and int(strftime("%S"))==self.seconds:
+            self.update(self.message)
+            self.update_timer.pause()
+            self.app.query_one("#info_text", Label).update("Press q to quit")
+            self.ring()
+        
+
     def pause(self) -> None:
         self.update_timer.pause()
         self.temp=monotonic()
@@ -90,6 +110,7 @@ class Time(Digits):
     def ring(self) -> None:
         mixer.music.load(self.ringtone)
         mixer.music.play()
+        self.ringing=True
         write_default_backup()
         try:
             btn=self.app.query_one("#stop_ring_btn",Button)
@@ -109,6 +130,7 @@ class Pomodoro(Digits):
     ):
         self.time_list = time_list
         self.ringtone = ringtone
+        self.ringing=False
 
         self.pomodoro_mode=begin[-2]
         self.target_seconds = config["pomodoro"][self.pomodoro_mode] * 60 
@@ -173,6 +195,7 @@ class Pomodoro(Digits):
         mixer.music.load(self.ringtone)
         mixer.music.play()
         write_default_backup()
+        self.ringing=True
         try:
             btn=self.app.query_one("#stop_ring_btn",Button)
             btn.styles.display="block"

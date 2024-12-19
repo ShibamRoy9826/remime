@@ -31,6 +31,7 @@ setup(
     author_email="royshibam9826@gmail.com",
     url="https://github.com/ShibamRoy9826/remime",
     packages=find_packages(),  
+    data_files=[("configs",['configs/config.toml','configs/digital_clock.mp3','configs/remime.tcss'])],
     install_requires=readRequirements(),
     entry_points={
         "console_scripts": [

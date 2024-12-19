@@ -1,0 +1,56 @@
+[general]
+# Edit to some other ringtone if you want a different alarm sound 
+ringtone_path="/home/shibam/.config/remime/digital_clock.mp3" 
+# Whether to display a border around the clock
+border_enabled=true 
+
+# Border type, read at: https://textual.textualize.io/styles/border/#all-border-types
+border_type="round"  
+
+# Border color
+border_color="#cdd6f4" 
+custom_message="Either you run the day, or the day runs you!" # Custom message that you may want to have around the clock border
+                                                              # Keep "" if you don't want this
+# Format of clock when called --clock (12 hour clock)
+time_format="%I:%M:%S" 
+# Format of clock when called --clock-24 (24 hour clock)
+time_format_24="%H:%M:%S" 
+## Still under work, will not work properly
+target_time_label=true 
+# Number of seconds after which it will save the time, requires take_backups=true
+backup_interval=5 
+header=false # To toggle the header widget
+footer=false # To toggle the footer widget
+
+[pomodoro]
+# Pomodoro time (in minutes)
+pomodoro=25  
+# Short break time (in minutes)
+short_break=5  
+# Long break time (in minutes)
+long_break=20  
+# Automatically change modes from pomodoro to short_break, and occasionally long_breaks
+automatic_mode_change=true 
+# Take time backups, if you quit the application by mistake, and reopen it, you will be almost on the same place! (depends on backup_interval)
+take_backups=true 
+# Total number of pomodoros, each pomodoro consits of 1 working session, and a short_break. After total_pomodoros, a long break timer starts
+total_pomodoros=4 
+
+[timer]
+# Default hours when no time is specified while calling --in
+default_hour=0 
+# Default minutes when no time is specified while calling --in
+default_min=0 
+# Default seconds when no time is specified while calling --in
+default_sec=0 
+## Working on it, doesn't work for now..
+take_backups=true 
+
+[keybindings] 
+## You can learn about the syntax of the keybindings here: https://textual.textualize.io/guide/input/#bindings
+quit_app="q" ## To quit the application
+toggle_dark="d" ## To toggle dark mode
+stop_ring="m" ## To stop ringing(Mute)
+pause_time="p" ## To pause the alarm
+reset_time="r" ## To reset the clock tiem
+

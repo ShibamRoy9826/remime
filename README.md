@@ -182,7 +182,7 @@ The configuration file for remime can be found at $HOME/.config/remime/config.to
     Keybindings <img src="https://github.com/Anmol-Baranwal/Cool-GIFs-For-GitHub/assets/74038190/7b282ec6-fcc3-4600-90a7-2c3140549f58" width="30">
 </h2>
 
-Here's a list of all the keybindings
+Here's a list of all the default keybindings
 ```text
 q -> Quits the application
 d -> Toggles dark mode
@@ -190,21 +190,22 @@ m -> Mutes the alarm sound
 p -> Pause/Resume the alarm
 r -> Reset the alarm
 ```
+But you can also change this bindings from your configuration file!
 
+> [!NOTE]
 > Fun Fact: The name Remime actually stands for "REMInd ME"
 
 <img src="https://user-images.githubusercontent.com/73097560/115834477-dbab4500-a447-11eb-908a-139a6edaec5c.gif">
 
 ## To-Do 🛠️
-- An "--at" mode to set an alarm which would ring at a specific time
-- Configurable buttons
-- Custom keybindings
+- Configurable buttons(To manually disable or enable buttons)
 - Nice quotes on top of clock border
 - Work on a lightweight alternative for the audio
+- Configurable alarm messages and target labels
 
 ## Known bugs 🐞
-- Hovering on Pause/Start button occasionally causes weird colors to show up
-- Doesn't backup break timing
+- Doesn't backup break timing properly
+- occasionally shows wrong target labels, even when the original target time is correct.(In automatic pomodoro mode)
 
 ## Contributing 🤝
 
